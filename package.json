@@ -1,0 +1,10 @@
+{
+  "name": "sirimath md new",
+  "version": "1.0.0",
+  "description": "My Render web app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {}
+}
