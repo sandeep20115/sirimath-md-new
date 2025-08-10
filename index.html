@@ -79,3 +79,127 @@
 
 </body>
 </html>
+<!-- Commands Preview Panel (place before </body>) -->
+<style>
+  #cmd-panel {
+    position: fixed;
+    right: 18px;
+    top: 80px;
+    width: 320px;
+    max-height: 70vh;
+    overflow: auto;
+    backdrop-filter: blur(6px);
+    background: rgba(8,8,8,0.6);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 12px;
+    border-radius: 12px;
+    color: #fff;
+    z-index: 9999;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    font-family: Inter, Arial, sans-serif;
+  }
+  #cmd-panel h4 { margin: 0 0 8px 0; color: #ff8a8a; }
+  .cmd-btn { width:100%; margin:6px 0; padding:8px 10px; border-radius:8px; border:none; font-weight:600; cursor:pointer; }
+  .cmd-btn.secondary { background:transparent; border:1px solid rgba(255,255,255,0.08); color:#fff; }
+  .cmd-btn.primary { background: linear-gradient(90deg,#ff3b3b,#ff8a8a); color:#111; }
+  #cmd-preview { margin-top:10px; padding:10px; background:rgba(0,0,0,0.45); border-radius:8px; font-size:13px; color:#f3e5e5; min-height:70px; white-space:pre-wrap; }
+  #cmd-close { position: absolute; left:8px; top:8px; background:transparent; border:none; color:#ff8a8a; cursor:pointer; }
+</style>
+
+<div id="cmd-panel" aria-live="polite">
+  <button id="cmd-close" title="Close">✕</button>
+  <h4>Site Commands — Preview</h4>
+
+  <!-- command buttons -->
+  <button class="cmd-btn primary" data-cmd="playVideo">Play Background Video</button>
+  <button class="cmd-btn secondary" data-cmd="pauseVideo">Pause Background Video</button>
+  <button class="cmd-btn secondary" data-cmd="toggleComments">Toggle Comments Panel</button>
+  <button class="cmd-btn secondary" data-cmd="clearComments">Clear All Comments</button>
+  <button class="cmd-btn secondary" data-cmd="exportComments">Export Comments (JSON)</button>
+  <button class="cmd-btn secondary" data-cmd="scrollTop">Scroll To Top</button>
+
+  <div id="cmd-preview">Command output will appear here...</div>
+</div>
+
+<script>
+(function(){
+  const panel = document.getElementById('cmd-panel');
+  const preview = document.getElementById('cmd-preview');
+
+  function write(msg){
+    const time = new Date().toLocaleTimeString();
+    preview.textContent = `[${time}] ${msg}`;
+  }
+
+  // find elements we control
+  const video = document.getElementById('bg-video'); // must match your video id
+  const commentsWrapper = document.getElementById('comments-wrapper');
+
+  // command implementations
+  const commands = {
+    playVideo(){
+      if(video && video.paused){ video.play(); write('Background video started.'); }
+      else if(video) write('Background video already playing.');
+      else write('No background video found (id="bg-video").');
+    },
+    pauseVideo(){
+      if(video && !video.paused){ video.pause(); write('Background video paused.'); }
+      else if(video) write('Background video already paused.');
+      else write('No background video found (id="bg-video").');
+    },
+    toggleComments(){
+      if(!commentsWrapper){ write('Comments panel not found.'); return; }
+      const vis = getComputedStyle(commentsWrapper).display !== 'none';
+      commentsWrapper.style.display = vis ? 'none' : 'flex';
+      write('Comments panel ' + (vis ? 'hidden.' : 'shown.'));
+    },
+    clearComments(){
+      try {
+        localStorage.removeItem('comments');
+        // re-render if page has renderComments function
+        if(typeof renderComments === 'function') renderComments();
+        write('All comments cleared from localStorage.');
+      } catch(e){
+        write('Failed to clear comments: ' + e.message);
+      }
+    },
+    exportComments(){
+      try{
+        const cs = JSON.parse(localStorage.getItem('comments')||'[]');
+        const json = JSON.stringify(cs, null, 2);
+        // create a temporary download link
+        const blob = new Blob([json], {type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'comments_export.json';
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+        write('Comments exported (' + cs.length + ' items).');
+      } catch(e){
+        write('Export failed: ' + e.message);
+      }
+    },
+    scrollTop(){
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      write('Scrolled to top.');
+    }
+  };
+
+  // hook buttons
+  panel.querySelectorAll('button[data-cmd]').forEach(btn=>{
+    btn.addEventListener('click', ()=> {
+      const cmd = btn.getAttribute('data-cmd');
+      if(commands[cmd]) commands[cmd]();
+      else write('Unknown command: ' + cmd);
+    });
+  });
+
+  // close button
+  document.getElementById('cmd-close').addEventListener('click', ()=> {
+    panel.style.display = 'none';
+  });
+
+  // show initial status
+  write('Commands panel ready. Video ' + (video ? (video.paused ? 'paused' : 'playing') : 'not found') + '.');
+})();
+</script>
