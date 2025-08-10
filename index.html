@@ -59,3 +59,126 @@
 <footer>&copy; 2025 SIRIMATH MD OFFICIAL. All rights reserved.</footer>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Background YouTube Video with Comment Box</title>
+<style>
+  /* Make iframe fill whole screen behind */
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: Arial, sans-serif;
+    color: white;
+    overflow: hidden;
+  }
+  #video-background {
+    position: fixed;
+    top: 0; left: 0; bottom: 0; right: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+  }
+  #video-background iframe {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 177.77vh;  /* 16:9 aspect ratio */
+    height: 100vh;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    filter: brightness(0.7);
+  }
+
+  /* Comment box */
+  #comment-section {
+    position: fixed;
+    top: 20px; left: 20px; right: 20px;
+    max-width: 600px;
+    background: rgba(0,0,0,0.6);
+    padding: 15px;
+    border-radius: 8px;
+  }
+  #comment-section h2 {
+    margin-top: 0;
+  }
+  #comment-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 10px;
+  }
+  .comment {
+    background: rgba(255,255,255,0.1);
+    margin-bottom: 8px;
+    padding: 8px;
+    border-radius: 5px;
+  }
+  #comment-form textarea {
+    width: 100%;
+    height: 60px;
+    resize: none;
+    border-radius: 5px;
+    border: none;
+    padding: 8px;
+  }
+  #comment-form button {
+    margin-top: 8px;
+    padding: 8px 15px;
+    background: #2196f3;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+  }
+  #comment-form button:hover {
+    background: #0b7dda;
+  }
+</style>
+</head>
+<body>
+
+<!-- YouTube video background -->
+<div id="video-background">
+  <iframe
+    src="https://www.youtube.com/embed/lFQjfNG7SuY?autoplay=1&mute=1&loop=1&playlist=lFQjfNG7SuY&controls=0&showinfo=0&modestbranding=1&rel=0"
+    frameborder="0"
+    allow="autoplay; encrypted-media"
+    allowfullscreen
+  ></iframe>
+</div>
+
+<!-- comment section -->
+<div id="comment-section">
+  <h2>Type your commands here (English)</h2>
+  <div id="comment-list"></div>
+  <form id="comment-form">
+    <textarea id="comment-input" placeholder="Type your command..."></textarea>
+    <button type="submit">Submit</button>
+  </form>
+</div>
+
+<script>
+  const commentForm = document.getElementById('comment-form');
+  const commentInput = document.getElementById('comment-input');
+  const commentList = document.getElementById('comment-list');
+
+  commentForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const commentText = commentInput.value.trim();
+    if (!commentText) return;
+
+    const commentDiv = document.createElement('div');
+    commentDiv.className = 'comment';
+    commentDiv.textContent = commentText;
+
+    commentList.appendChild(commentDiv);
+    commentInput.value = '';
+    commentInput.focus();
+    commentList.scrollTop = commentList.scrollHeight;
+  });
+</script>
+
+</body>
+</html>
